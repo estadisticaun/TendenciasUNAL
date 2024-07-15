@@ -1,0 +1,347 @@
+---
+title: <p style="text-align:center; line-height:40%"><font size="+4">TENDENCIAS ESTADÍSTICAS UNIVERSIDAD NACIONAL DE COLOMBIA</font></p>
+author: <p style="text-align:center; line-height:100%"><font size="+3"><b></br>Dirección Nacional de Planeación y Estadística</b><br><br>Oficina Nacional de Estadística</font></p><p style="text-align:center; line-height:120%"><font size="+3">UNIVERSIDAD NACIONAL DE COLOMBIA<br>Julio de 2024</font></p>
+format:
+  onyxia-revealjs:
+    code-fold: true
+    output-file: index.html
+    chalkboard: true
+    slide-number: true
+    preview-links: auto
+    logo: "Imagenes/logoun.png"
+width: 1300
+editor: visual
+---
+
+```{r}
+# Librerías ----
+library(UnalData)
+library(UnalR)
+library(readxl)
+library(tidyverse)
+library(scales)
+library(ggrepel)
+library(cowplot)
+library(ggbrace)
+library(gt)
+```
+
+```{r}
+# Importar Bases de Datos Generales
+
+```
+
+## QR de la presentación
+
+<br>
+
+![](Imagenes/QRPresentacion.png){fig-align="center" height="400"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Librerías requeridas
+library(tidyverse)
+library(UnalData)
+library(UnalR)
+library(viridis)
+```
+
+---
+
+### Contenido de la Presentación 
+
+Esta presentación  contiene .....
+
+---
+
+### Indice
+
+---
+
+## TENDENCIAS GENERALES {.center}
+
+---
+
+### Aspirantes y Admitidos
+
+::: panel-tabset
+
+
+### Aspirantes 
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Aspirantes") %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("blue"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de aspirantes a la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total aspirantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Nivel
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#984ea3",  "#e41a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de aspirantes a la UNAL por nivel de formación",
+  categoria = NIVEL,
+  labelX    = "Periodo",
+  labelY    = "Total aspirantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, INS_SEDE_NOMBRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  filter(YEAR >= 2015) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#1b7837","#33a02c",
+              "#fb9a99","#e31a1c","#ffff33","#ff7f00",
+              "#cab2d6","#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de aspirantes a la UNAL por sedes",
+  categoria = INS_SEDE_NOMBRE,
+  labelX    = "Periodo",
+  labelY    = "Total aspirantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Admitidos
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  filter(ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Admitidos") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("blue"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de admitidos en la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total admitidos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Nivel
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+   filter(ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#984ea3",  "#e41a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de admitidos a la UNAL por nivel de formación",
+  categoria = NIVEL,
+  labelX    = "Periodo",
+  labelY    = "Total admitidos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+     filter(ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, INS_SEDE_NOMBRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  filter(YEAR >= 2015) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#1b7837","#33a02c",
+              "#fb9a99","#e31a1c","#ffff33","#ff7f00",
+              "#cab2d6","#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de admitidos a la UNAL por sedes",
+  categoria = INS_SEDE_NOMBRE,
+  labelX    = "Periodo",
+  labelY    = "Total admitidos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Reflexión
+
+:::
+
+---
+
+### Matriculados
+
+::: panel-tabset
+
+
+### Matriculados
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Matriculados") %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("red"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Nivel
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#984ea3",  "#e41a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL por nivel de formación",
+  categoria = NIVEL,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE_NOMBRE_MAT)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#1b7837","#33a02c",
+              "#fb9a99","#e31a1c","#ffff33","#ff7f00",
+              "#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL por sedes",
+  categoria = SEDE_NOMBRE_MAT,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Estrato
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(TIPO_NIVEL == "Pregrado") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, ESTRATO_ORIG)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-")),
+         Total = ifelse(Periodo == "2011-2", NA, Total)) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#e31a1c", "#1b7837",
+              "#ffff33","#ff7f00","#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en PREGRADO de la UNAL por estrato",
+  categoria = ESTRATO_ORIG,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Admisión
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#08519c","#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL por tipo de admisión",
+  categoria = MOD_ADM,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Reflexión
+
+:::
+
+---
+
+## ¡Gracias! {.center}
+
+---
+
+## Opciones Navegación Presentación
+
+-   Pantalla completa: dar clic en tecla f y, para salir, dar clic en tecla Esc.
+-   Última diapositiva: dar clic en Shift + cursor derecho.
+-   Primera diapositiva: dar clic en Shift + cursor izquierdo.
+-   Activar y desactivar lienzo de notas: utilice la tecla C.
+-   Activar y desactivar pizarra: utilice la tecla B.
+-   Borrar notas: utilice la tecla DEL o Supr.
+-   Colores pincel: hacia adelante, utilice la tecla X.
+-   Colores pincel: hacia atrás, utilice la tecla Y.
+
+Más información en [Opciones de Navegación](https://quarto.org/docs/presentations/revealjs/presenting.html#navigation-options){target="_blank"} manual Quarto.
