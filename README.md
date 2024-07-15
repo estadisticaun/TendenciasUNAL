@@ -1,3 +1,3 @@
 # Contenido del repositorio
 
-Este repositorio contiene el contenido de la presentación de la tésis de doctorado "EL ACCESO A LA EDUCACIÓN SUPERIOR EN COLOMBIA" - LA IGUALDAD DE OPORTUNIDADES EN LA POLITICA EDUCATIVA a cargo de la estudiante Tatiana Castañeda López.
+Este repositorio contiene las tendencias estadísticas generales de la [Universidad Nacional de Colombia - UNAL](https://unal.edu.co/). Aquellos interesados en explorar en detalle el contenido de las cifras/estadísticas oficiales de esta institución, los invitamos a acceder y explorar la página de [estadísticas oficiales](https://estadisticas.unal.edu.co/home/) de la UNAL en donde econtrará éstas y otras cifras de interés institucional.
