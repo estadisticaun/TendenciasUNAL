@@ -35,7 +35,7 @@ library(gt)
 
 <br>
 
-![](Imagenes/QRPresentacion.png){fig-align="center" height="400"}
+![](Imagenes/QR.png){fig-align="center" height="400"}
 
 ```{r}
 #| echo: false
@@ -324,6 +324,315 @@ Plot.Series(
 </center>
 
 ### Reflexión
+
+:::
+
+---
+
+### Graduados
+
+::: panel-tabset
+
+
+### Graduados
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Graduados") %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("red"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de graduados en la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total graduados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Nivel
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#984ea3",  "#e41a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de graduados en la UNAL por nivel de formación",
+  categoria = NIVEL,
+  labelX    = "Periodo",
+  labelY    = "Total graduados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE_NOMBRE_ADM)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#1b7837","#33a02c",
+              "#e31a1c","#ffff33","#ff7f00", "#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de graduados en la UNAL por sedes",
+  categoria = SEDE_NOMBRE_ADM,
+  labelX    = "Periodo",
+  labelY    = "Total graduados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Estrato
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  filter(TIPO_NIVEL == "Pregrado") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, ESTRATO_ORIG)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#e31a1c", "#1b7837",
+              "#ffff33","#ff7f00","#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de graduados en PREGRADO de la UNAL por estrato",
+  categoria = ESTRATO_ORIG,
+  labelX    = "Periodo",
+  labelY    = "Total graduados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Admisión
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#08519c","#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de graduados en la UNAL por tipo de admisión",
+  categoria = MOD_ADM,
+  labelX    = "Periodo",
+  labelY    = "Total graduados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Reflexión
+
+:::
+
+---
+
+### Docentes de Carrera
+
+::: panel-tabset
+
+### Docentes
+
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Docentes") %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("blue"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de docentes de carrera en la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total docentes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#1b7837","#33a02c",
+              "#e31a1c","#ffff33","#ff7f00", "#6a3d9a"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de docentes de carrera en la UNAL por sedes",
+  categoria = SEDE,
+  labelX    = "Periodo",
+  labelY    = "Total docentes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Formación
+
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#1b7837","#1f78b4", "#4d4d4d", "#e31a1c","#ff7f00"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de docentes de carrera en la UNAL por máximo nivel de formación",
+  categoria = FORMACION,
+  labelX    = "Periodo",
+  labelY    = "Total docentes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Edad
+
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, CAT_EDAD)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#1b7837","#1f78b4", "#4d4d4d", "#ff7f00", "#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de docentes de carrera en la UNAL según grupos de edad",
+  categoria = CAT_EDAD,
+  labelX    = "Periodo",
+  labelY    = "Total docentes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Reflexión
+
+:::
+
+---
+
+### Funcionarios Administrativos
+
+::: panel-tabset
+
+### Funcionarios
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  mutate(Poblacion = "Funcionarios") %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("green"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de funcionarios de carrera en la UNAL",
+  categoria = Poblacion,
+  labelX    = "Periodo",
+  labelY    = "Total funcionarios",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Sedes
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#ff7f00","#33a02c",
+              "#ffff33", "#e31a1c","#1b7837", "#6a3d9a",
+              "#fb9a99", "#dd3497"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de administrativos de carrera en la UNAL por sedes",
+  categoria = SEDE,
+  labelX    = "Periodo",
+  labelY    = "Total administrativos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Formación
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  filter(YEAR >= 2015) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#4d4d4d","#1f78b4","#ff7f00","#33a02c",
+              "#ffff33", "#e31a1c","#1b7837", "#6a3d9a",
+              "#dd3497"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de administrativos de carrera en la UNAL por máximo nivel de formación",
+  categoria = FORMACION,
+  labelX    = "Periodo",
+  labelY    = "Total administrativos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Edad
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, CAT_EDAD)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#1b7837","#1f78b4", "#4d4d4d", "#ff7f00", "#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de administrativos de carrera en la UNAL según grupos de edad",
+  categoria = CAT_EDAD,
+  labelX    = "Periodo",
+  labelY    = "Total administrativos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Reflexión
+
+
 
 :::
 
