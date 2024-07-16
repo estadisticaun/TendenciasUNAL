@@ -632,9 +632,384 @@ Plot.Series(
 
 ### Reflexión
 
+:::
 
+---
+
+## Género, inclusión, territorio y bienestar {.center}
+
+
+---
+
+### Igualdad de género
+
+::: panel-tabset
+
+### Aspirantes
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue", "green", "#ff7f00"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de aspirantes a la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Admitidos
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  filter(ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-")),
+         Total = ifelse(Periodo == "2012-1", NA, Total)) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue", "green", "#ff7f00"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de admitidos a la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Matriculados
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de matriculados en la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(TIPO_NIVEL == "Postgrado") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de matriculados de postgrado en la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Especial
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(TIPO_NIVEL == "Pregrado", MOD_ADM == "Especial") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de matriculados en pregrado programas PAES y PEAMA de la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Graduados
+
+<center>
+```{r}
+UnalData::Graduados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de graduados en la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Docentes
+
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de docentes de carrera en la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Funcionarios
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de administrativos de carrera en la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### NNacional
+
+<center>
+```{r}
+UnalData::Administrativos %>%
+  filter(SEDE == "Nivel Nacional") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue"),
+  ylim = c(0, 100),
+  titulo = "Evolución porcentaje de administrativos de carrera Nivel Nacional de la UNAL por género",
+  categoria = SEXO,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Reflexión
 
 :::
+
+---
+
+### Programas Inclusión en la UNAL 
+
+::: panel-tabset
+
+### Descripción
+
+### Aspirantes
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_INS)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e31a1c", "#08519c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución porcentaje de aspirantes en la UNAL por modalidad de inscripción",
+  categoria = MOD_INS,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+
+### Modalidades
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  filter(MOD_INS == "Especial") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, TIPO_INS)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#08519c", "green", "#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de aspirantes en la UNAL programas PAES, PEAMA y PAET",
+  categoria = TIPO_INS,
+  labelX    = "Periodo",
+  labelY    = "Total aspirantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Matricula
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e31a1c", "#08519c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución porcentaje de matriculados en la UNAL por tipo de admisión",
+  categoria = MOD_ADM,
+  freqRelativa = TRUE,
+  labelX    = "Periodo",
+  labelY    = "Porcentaje",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Modalidades
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(MOD_ADM == "Especial") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, TIPO_ADM)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  filter(TIPO_ADM != "PEAA") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#08519c","#e31a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL programas PAES y PEAMA",
+  categoria = TIPO_ADM,
+  labelX    = "Periodo",
+  labelY    = "Total matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### PAES
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(TIPO_ADM == "PAES") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, PAES)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue", "green", "#ff7f00", "#6a3d9a", "black"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL por modalidades del Programa PAES",
+  categoria = PAES,
+  labelX    = "Periodo",
+  labelY    = "Total Matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### PEAMA
+
+<center>
+```{r}
+UnalData::Matriculados %>%
+  filter(TIPO_ADM == "PEAMA") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, PEAMA)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#e41a1c", "blue", "black", "#ff7f00", "#6a3d9a", "gray", "green"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de matriculados en la UNAL por modalidades del Programa PEAMA",
+  categoria = PEAMA,
+  labelX    = "Periodo",
+  labelY    = "Total Matriculados",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Admitidos PAET
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  filter(TIPO_INS == "PAET", ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, PAET)) %>% 
+  Plot.Barras(
+  valores   = Total,
+  categoria = PAET,
+    titulo = "Distribución admitidos en la UNAL Programa PAET, periodo 2024-1",
+  labelY    = "Total admitidos"
+)
+```
+</center>
+
+### Reflexión
+
+:::
+
+
+---
+
+### Perspectiva territorial
+
+---
+
+### Bienestar Universitario
 
 ---
 
