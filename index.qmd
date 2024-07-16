@@ -24,6 +24,7 @@ library(ggrepel)
 library(cowplot)
 library(ggbrace)
 library(gt)
+library(RColorBrewer)
 ```
 
 ```{r}
@@ -61,7 +62,7 @@ Esta presentación  contiene .....
 
 ---
 
-## Tendencias Generales {.center}
+## TENDENCIAS GENERALES {.center}
 
 ---
 
@@ -636,7 +637,7 @@ Plot.Series(
 
 ---
 
-## Género, inclusión, territorio y bienestar {.center}
+## GÉNERO, INCLUSIÓN, TERRITORIO Y BIENESTAR {.center}
 
 
 ---
@@ -1117,6 +1118,406 @@ Plot.Mundo(datos = df,
 ---
 
 ### Bienestar Universitario
+
+---
+
+## CALIDAD {.center}
+
+
+---
+
+### Formación Docentes de Carrera
+
+<br>
+<center>
+```{r}
+UnalData::Docentes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  colores = c("#1b7837","#1f78b4", "#4d4d4d", "#e31a1c","#ff7f00"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de docentes de carrera en la UNAL por máximo nivel de formación",
+  categoria = FORMACION,
+  labelX    = "Periodo",
+  labelY    = "Total docentes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+---
+
+### Razón Estudiante por Docente
+
+---
+
+### Resultados Examen de Admisión UNAL - Pregrado
+
+::: panel-tabset
+
+```{r}
+Puntaje_Adm <- UnalData::Aspirantes %>%                     filter(TIPO_NIVEL == "Pregrado", YEAR >= 2009) %>%
+  mutate(Periodo = paste(YEAR, SEMESTRE, sep = "-"))
+```
+
+
+
+### Distribución
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm,
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  titulo = "Evolución distribución puntajes examen de admisión",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### Sedes
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = INS_SEDE_NOMBRE,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  colores = c("#377eb8","#e41a1c","#252525","#984ea3","#ff7f00","#4daf4a","#a65628", "#f781bf","#999999"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por sedes",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Sede:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+
+### Facultades
+
+<center>
+```{r}
+Plot.Treemap(
+  datos       = Puntaje_Adm %>% filter(YEAR >= 2024, SEMESTRE == 1, ADMITIDO == "Sí"),
+  variables   = FACULTAD_S,
+  atributo    = PTOTAL,
+  textFreq    = "n",
+  estadistico = "Promedio",
+  colores     = brewer.pal(22, "RdYlGn"),
+  titulo      = "Promedio examen de admisión estudiantes admitidos por facultades",
+  libreria    = "highcharter",
+  estilo      = list(hc.Tema = 5, hc.borderRadius = 20, hc.Credits = "Periodo 2024-1")
+)
+```
+</center>
+
+### Sexo
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = SEXO,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por sexo",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Género:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### Inscripción
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = TIPO_INS,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por programa de inscripción",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Programa:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### PAES
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí", TIPO_INS == "PAES"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = PAES,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a", "#984ea3"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por modalidades del programa PAES",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Programa:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### PEAMA
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí", TIPO_INS == "PEAMA"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = PEAMA,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+  colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a", "#984ea3"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por modalidades del programa PEAMA",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Modalidad:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### PAET
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2024, ADMITIDO == "Sí", TIPO_INS == "PAET"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = PAET,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+ # colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a", "#984ea3"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos por modalidades del programa PAET",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Modalidad:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### Estrato
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Puntaje_Adm %>% filter(YEAR >= 2022, ADMITIDO == "Sí"),
+  variable = PTOTAL,
+  grupo1 = Periodo,
+  grupo2 = ESTRATO_ORIG,
+  ylim = c(0, 1000),
+  outliers = FALSE,
+ colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a", "#984ea3", "#525252", "yellow"),
+  titulo = "Evolución distribución puntajes examen de admisión de admitidos según estrato",
+  labelY = "Puntaje examen",
+  textBox = "Puntaje",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Estrato:", hc.Tema = 5, hc.Credits = "Aspirantes a pregado (No incluye datos atípicos)"
+))
+```
+</center>
+
+### Reflexión
+
+:::
+
+---
+
+#### Resultados por Competencias Prueba Saber Pro, periodo 2016-2022
+
+```{r}
+Saber <- UnalData::SaberPro %>% 
+  rename(GLOBAL = PUNTAJE_GLOBAL,
+         `RAZONAMIENTO CUANTITATIVO` = PUNT_RAZO_CUANT,
+         INGLÉS = PUNT_INGLES,
+         `LECTURA CRÍTICA` = PUNT_LECT_CRIT,
+         `COMPETENCIAS CIUDADANAS` = PUNT_COMP_CIUD,
+         `COMUNICACIÓN ESCRITA` = PUNT_COMU_ESCR) %>% 
+  mutate(`Saber Pro` = "Saber Pro")
+```
+
+
+::: panel-tabset
+
+##### Pruebas
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = `Saber Pro`,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  colores = c("#41ae76"),
+  rango = c(0, NaN)
+)
+```
+</center>
+
+##### Sedes
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = SEDE_NOMBRE_ADM,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Sede:")
+)
+```
+</center>
+
+##### Sexo
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = SEXO,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Sexo:")
+)
+```
+</center>
+
+
+##### Edad
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = CAT_EDAD,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Edad:")
+)
+```
+</center>
+
+##### Estrato 
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = ESTRATO,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Estrato:")
+)
+```
+</center>
+
+##### Tipo de Admisión
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber,
+  categoria = TIPO_ADM,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Tipo de admisión:")
+)
+```
+</center>
+
+##### PAES
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber %>% filter(TIPO_ADM == "PAES"),
+  categoria = PAES,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Modalidad PAES:")
+)
+```
+</center>
+
+##### PEAMA
+
+<center>
+```{r}
+Plot.Radar(
+  datos     = Saber %>% filter(TIPO_ADM == "PEAMA"),
+  categoria = PEAMA,
+  variables = vars(
+    GLOBAL, `RAZONAMIENTO CUANTITATIVO`, INGLÉS,
+    `LECTURA CRÍTICA`, `COMPETENCIAS CIUDADANAS`, `COMUNICACIÓN ESCRITA`
+  ),
+  rango = c(0, NaN),
+  estilo= list(
+    ply.LegendTitle = "Programa PEAMA:")
+)
+```
+</center>
+
+##### Reflexión
+
+:::
 
 ---
 
