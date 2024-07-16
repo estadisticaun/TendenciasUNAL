@@ -1007,6 +1007,113 @@ UnalData::Aspirantes %>%
 
 ### Perspectiva territorial
 
+::: panel-tabset
+
+### Aspirantes
+<center>
+```{r}
+Plot.Mapa(
+  df = UnalData::Aspirantes %>% filter(YEAR == 2024, SEMESTRE == 1),
+  depto = COD_DEP_RES,
+  mpio = COD_CIU_RES,
+  tipo     = "Mpios",
+  titulo   = "Aspirantes 2024-1",
+  naTo0    = TRUE,
+  cortes        = c(0, 1, 10, 50, Inf),
+  colores       = c("white", "#10F235", "yellow", "blue"),
+  estatico = FALSE,
+  estilo   = list(
+   Theme = 5, anchoBorde = 0.2, subtitle = "Periodo 2024-1\n"))
+```
+</center>
+
+
+### Matriculados
+
+<center>
+```{r}
+Plot.Mapa(
+  df = UnalData::Matriculados %>% filter(YEAR == 2023, SEMESTRE == 2),
+  depto = COD_DEP_PROC,
+  mpio = COD_CIU_PROC,
+  tipo     = "Mpios",
+  titulo   = "Matriculados 2023-2",
+  naTo0    = TRUE,
+  cortes        = c(0, 1, 10, 50, Inf),
+  colores       = c("white", "#10F235", "yellow", "blue"),
+  estatico = FALSE,
+  estilo   = list(
+   Theme = 5, anchoBorde = 0.2, subtitle = "Periodo 2023-2\n"))
+```
+</center>
+
+### PAES
+
+<center>
+```{r}
+Plot.Mapa(
+  df = UnalData::Matriculados %>% filter(YEAR == 2023, SEMESTRE == 2, TIPO_ADM == "PAES"),
+  depto = COD_DEP_PROC,
+  mpio = COD_CIU_PROC,
+  tipo     = "Mpios",
+  titulo   = "Matriculados 2023-2",
+  naTo0    = TRUE,
+  cortes        = c(0, 1, 10, 50, Inf),
+  colores       = c("white", "#10F235", "yellow", "blue"),
+  estatico = FALSE,
+  estilo   = list(
+   Theme = 5, anchoBorde = 0.2, subtitle = "Periodo 2023-2\n"))
+```
+</center>
+
+### PEAMA
+
+<center>
+```{r}
+Plot.Mapa(
+  df = UnalData::Matriculados %>% filter(YEAR == 2023, SEMESTRE == 2, TIPO_ADM == "PEAMA"),
+  depto = COD_DEP_PROC,
+  mpio = COD_CIU_PROC,
+  tipo     = "Mpios",
+  titulo   = "Matriculados 2023-2",
+  naTo0    = TRUE,
+  cortes        = c(0, 1, 10, 50, Inf),
+  colores       = c("white", "#10F235", "yellow", "blue"),
+  estatico = FALSE,
+  estilo   = list(
+   Theme = 5, anchoBorde = 0.2, subtitle = "Periodo 2023-2\n"))
+```
+</center>
+
+### Docentes
+
+###### País Máxima Formación de los Docentes de la UNAL
+
+<center>
+```{r}
+df <- UnalData::Docentes %>% filter(YEAR == 2023, SEMESTRE == 2) %>% summarise(Total = n(), .by = c(CODS_PAISU))
+
+Plot.Mundo(datos = df,
+           paises   = CODS_PAISU,
+           variable = Total,
+           tipo     = "Pais",
+           titulo   = "Docentes 2023-2",
+           centroideMapa = "BELGIUM",
+           cortes = c(0, 1, 10, 50, 500, Inf),
+           colores = c("white", "orange","#2b8cbe", "#10F235", "red"),
+                 opacidad = 1,
+                 colBorde = "#74c476",
+                 compacto = FALSE,
+                 textSize = 0,
+                 estilo = list(anchoBorde = 1))
+```
+</center>
+      
+
+### Reflexión
+
+:::
+
 ---
 
 ### Bienestar Universitario
