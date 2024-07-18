@@ -25,10 +25,29 @@ library(cowplot)
 library(ggbrace)
 library(gt)
 library(RColorBrewer)
+library(readxl)
 ```
 
 ```{r}
-# Importar Bases de Datos Generales
+# Importar y Transformar Bases de Datos Generales
+
+Programas <- read_excel("Fuentes/Programas.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000)
+
+# Transformar bases programas
+
+Programas <- Programas %>% pivot_longer(`1994`:`2024`, names_to = "YEAR", values_to = "Total") %>% pivot_wider(names_from = Nivel, values_from = Total) %>% mutate(Total = Pregrado + Especialización + `Especialidades Médicas`+ Maestría, Doctorado,
+ Postgrado =  Especialización + `Especialidades Médicas`+ Maestría, Doctorado,
+ YEAR = as.numeric(YEAR)) %>% 
+  mutate(Categoría = ifelse(Categoría == "Programas", "Total Programas", Categoría))
+
+
+
+Evol_Programas <- Programas %>% filter(Categoría == "Total Programas", YEAR != 2024)
+
+
+Acreditacion <- Programas %>% filter(between(YEAR, 2006, 2023), Categoría != "Total Programas") %>% mutate(Categoría = ifelse(Categoría == "Acreditación", "Programas Acreditados", Categoría))
 
 ```
 
@@ -54,13 +73,238 @@ library(viridis)
 
 ### Contenido de la Presentación 
 
-Esta presentación  contiene .....
+<br>
+
+<p style="font-size:100%;">Esta presentación  contiene las principales tendencias estadísticas de la [Universidad Nacional de Colombia](https://unal.edu.co/) durante los últimos 15 años. Así mismo, al final de cada uno de los diferentes componentes expuestos, se presentan algunas inquietudes generales o preguntas estratégicas que surgen de cada uno de los contenidos expuestos y que invitan a la reflexión sobre el presente y futuro de la institución.</p>
+
+---
+
+### Estadísticas e Indicadores Oficiales de la UNAL
+
+<p style="font-size:70%;">El contenido de esta presentación, así como otra adicional y con mayores niveles de detalle, se encuentra disponible en la [página de estadísticas oficiales](https://estadisticas.unal.edu.co/home/) de la Universidad Nacional de Colombia- UNAL. La información estadística oficial de la UNAL se dispone a través de dos estrategias: aplicaciones/dashboards y boletines estadísticos. A continuación, se presentan los enlaces a las aplicaciones y boletines estadísticos disponibles.</p>
+
+::: columns
+
+::: {.column width="4%"}
+:::
+
+::: {.column width="48%"}
+
+##### Aplicaciones/dashboards
+
+* [Aspirantes](https://estadisticas.unal.edu.co/Aspirantes/) y [Admitidos](https://estadisticas.unal.edu.co/Admitidos/)
+* [Matriculados](https://estadisticas.unal.edu.co/Matriculados/)
+* [Primera Matrícula](https://estadisticas.unal.edu.co/MatriculadosPV/)
+* [Graduados](https://estadisticas.unal.edu.co/Graduados/)
+* [Resultados Saber Pro](https://estadisticas.unal.edu.co/SaberPro/)
+* [Docentes de Carrera](https://estadisticas.unal.edu.co/Docentes/)
+* [Funcionarios Administrativos](https://estadisticas.unal.edu.co/Administrativos/)
+
+:::
+
+::: {.column width="48%"}
+
+#### Boletines estadísticos
+
+* [Boletín Nacional](https://estadisticaun.github.io/BoletinNacional/)
+* [Boletín Sede Palmira](https://estadisticaun.github.io/BoletinPalmira/)
+* [Boletín Sede La Paz](https://estadisticaun.github.io/BoletinLaPaz/)
+* [Boletín Sede Orinoquía](https://estadisticaun.github.io/BoletinOrinoquia/)
+* [Boletín Sede Amazonía](https://estadisticaun.github.io/BoletinAmazonia/)
+* [Boletín Sede Caribe](https://estadisticaun.github.io/BoletinCaribe/)
+* [Boletín Sede Tumaco](https://estadisticaun.github.io/BoletinTumaco/)
+
+:::
+:::
 
 ---
 
 ### Indice
 
+* [PROGRAMAS ACADÉMICOS]()
+* [TENDENCIAS GENERALES]()
+* [GÉNERO, INCLUSIÓN, TERRITORIO Y BIENESTAR]()
+* [CALIDAD]()
+* [DESERCIÓN]()
+* [INVESTIGACIÓN]()
+* [INTERNACIONALIZACIÓN]()
+* [RANKINGS]()
+
+
 ---
+
+## PROGRAMAS ACADÉMICOS {.center}
+
+---
+
+### Características Programas Académicos UNAL
+
+::: panel-tabset
+
+### Total 
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas,
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Categoría,
+  titulo = "Evolución Total de Programas Académicos",
+  labelY =  "Total Programas",
+    estilo       = list(hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Nivel 
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas %>% mutate(Postgrado = Total - Pregrado) %>% select(YEAR, Pregrado, Postgrado) %>% pivot_longer(Pregrado:Postgrado, names_to = "Nivel", values_to = "Total"),
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Nivel,
+  titulo = "Evolución Total de Programas Académicos por Nivel de Formación",
+  labelY =  "Total Programas",
+  colores = c("#1f78b4","#e31a1c"),
+    estilo       = list(LegendTitle = "Nivel de Formación:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas %>% select(YEAR:Doctorado) %>% pivot_longer(Especialización:Doctorado, names_to = "Nivel", values_to = "Total"),
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Nivel,
+  ylim         = c(0, 180),
+  titulo = "Evolución Total de Programas Académicos por Modalidades de Postgrado",
+  labelY =  "Total Programas",
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#e41a1c"),
+    estilo       = list(LegendTitle = "Modalidad Postgrado:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Acreditados
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Pregrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Pregrado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de PREGRADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Postgrado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de POSTGRADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Maestría
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Maestría,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de MAESTRÍA vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Especialidades médicas
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = `Especialidades Médicas`,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de ESPECIALIDADES MÉDICAS vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Doctorado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Doctorado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de DOCTORADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Reflexión
+
+:::
+
+
 
 ## TENDENCIAS GENERALES {.center}
 
@@ -71,14 +315,14 @@ Esta presentación  contiene .....
 ::: panel-tabset
 
 
-### Aspirantes 
+### Aspirantes
 
 <center>
 ```{r}
 UnalData::Aspirantes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Aspirantes") %>% 
+  mutate(Poblacion = "Aspirantes") %>%
   Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -98,7 +342,7 @@ UnalData::Aspirantes %>%
 ```{r}
 UnalData::Aspirantes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -118,8 +362,8 @@ Plot.Series(
 ```{r}
 UnalData::Aspirantes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, INS_SEDE_NOMBRE)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
-  filter(YEAR >= 2015) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  filter(YEAR >= 2015) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -141,10 +385,10 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-  filter(ADMITIDO == "Sí") %>% 
+  filter(ADMITIDO == "Sí") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Admitidos") %>% 
+  mutate(Poblacion = "Admitidos") %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -164,9 +408,9 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-   filter(ADMITIDO == "Sí") %>% 
+   filter(ADMITIDO == "Sí") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -186,10 +430,10 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-     filter(ADMITIDO == "Sí") %>% 
+     filter(ADMITIDO == "Sí") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, INS_SEDE_NOMBRE)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
-  filter(YEAR >= 2015) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  filter(YEAR >= 2015) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -223,7 +467,7 @@ Plot.Series(
 UnalData::Matriculados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Matriculados") %>% 
+  mutate(Poblacion = "Matriculados") %>%
   Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -243,7 +487,7 @@ UnalData::Matriculados %>%
 ```{r}
 UnalData::Matriculados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -264,7 +508,7 @@ Plot.Series(
 ```{r}
 UnalData::Matriculados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE_NOMBRE_MAT)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -286,10 +530,10 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(TIPO_NIVEL == "Pregrado") %>% 
+  filter(TIPO_NIVEL == "Pregrado") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, ESTRATO_ORIG)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-")),
-         Total = ifelse(Periodo == "2011-2", NA, Total)) %>% 
+         Total = ifelse(Periodo == "2011-2", NA, Total)) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -310,7 +554,7 @@ Plot.Series(
 ```{r}
 UnalData::Matriculados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -342,7 +586,7 @@ Plot.Series(
 UnalData::Graduados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Graduados") %>% 
+  mutate(Poblacion = "Graduados") %>%
   Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -362,7 +606,7 @@ UnalData::Graduados %>%
 ```{r}
 UnalData::Graduados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, NIVEL)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -383,7 +627,7 @@ Plot.Series(
 ```{r}
 UnalData::Graduados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE_NOMBRE_ADM)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -404,9 +648,9 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Graduados %>%
-  filter(TIPO_NIVEL == "Pregrado") %>% 
+  filter(TIPO_NIVEL == "Pregrado") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, ESTRATO_ORIG)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -427,7 +671,7 @@ Plot.Series(
 ```{r}
 UnalData::Graduados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -458,7 +702,7 @@ Plot.Series(
 UnalData::Docentes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Docentes") %>% 
+  mutate(Poblacion = "Docentes") %>%
   Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -478,7 +722,7 @@ UnalData::Docentes %>%
 ```{r}
 UnalData::Docentes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -499,7 +743,7 @@ Plot.Series(
 ```{r}
 UnalData::Docentes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -519,7 +763,7 @@ Plot.Series(
 ```{r}
 UnalData::Docentes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, CAT_EDAD)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -551,7 +795,7 @@ Plot.Series(
 UnalData::Administrativos %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
-  mutate(Poblacion = "Funcionarios") %>% 
+  mutate(Poblacion = "Funcionarios") %>%
   Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -571,7 +815,7 @@ UnalData::Administrativos %>%
 ```{r}
 UnalData::Administrativos %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEDE)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -593,8 +837,8 @@ Plot.Series(
 ```{r}
 UnalData::Administrativos %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
-  filter(YEAR >= 2015) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  filter(YEAR >= 2015) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -616,7 +860,7 @@ Plot.Series(
 ```{r}
 UnalData::Administrativos %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, CAT_EDAD)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -652,7 +896,7 @@ Plot.Series(
 ```{r}
 UnalData::Aspirantes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -672,7 +916,7 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-  filter(ADMITIDO == "Sí") %>% 
+  filter(ADMITIDO == "Sí") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-")),
          Total = ifelse(Periodo == "2012-1", NA, Total)) %>%
@@ -716,7 +960,7 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(TIPO_NIVEL == "Postgrado") %>% 
+  filter(TIPO_NIVEL == "Postgrado") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
@@ -738,7 +982,7 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(TIPO_NIVEL == "Pregrado", MOD_ADM == "Especial") %>% 
+  filter(TIPO_NIVEL == "Pregrado", MOD_ADM == "Especial") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
@@ -824,7 +1068,7 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Administrativos %>%
-  filter(SEDE == "Nivel Nacional") %>% 
+  filter(SEDE == "Nivel Nacional") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, SEXO)) %>%
   mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
@@ -847,7 +1091,7 @@ Plot.Series(
 
 ---
 
-### Programas Inclusión en la UNAL 
+### Programas Inclusión en la UNAL
 
 ::: panel-tabset
 
@@ -859,7 +1103,7 @@ Plot.Series(
 ```{r}
 UnalData::Aspirantes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_INS)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -881,9 +1125,9 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-  filter(MOD_INS == "Especial") %>% 
+  filter(MOD_INS == "Especial") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, TIPO_INS)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -904,7 +1148,7 @@ Plot.Series(
 ```{r}
 UnalData::Matriculados %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, MOD_ADM)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -924,10 +1168,10 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(MOD_ADM == "Especial") %>% 
+  filter(MOD_ADM == "Especial") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, TIPO_ADM)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
-  filter(TIPO_ADM != "PEAA") %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
+  filter(TIPO_ADM != "PEAA") %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -946,9 +1190,9 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(TIPO_ADM == "PAES") %>% 
+  filter(TIPO_ADM == "PAES") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, PAES)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -967,9 +1211,9 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Matriculados %>%
-  filter(TIPO_ADM == "PEAMA") %>% 
+  filter(TIPO_ADM == "PEAMA") %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, PEAMA)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -988,8 +1232,8 @@ Plot.Series(
 <center>
 ```{r}
 UnalData::Aspirantes %>%
-  filter(TIPO_INS == "PAET", ADMITIDO == "Sí") %>% 
-  summarise(Total = n(), .by = c(YEAR, SEMESTRE, PAET)) %>% 
+  filter(TIPO_INS == "PAET", ADMITIDO == "Sí") %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, PAET)) %>%
   Plot.Barras(
   valores   = Total,
   categoria = PAET,
@@ -1109,7 +1353,7 @@ Plot.Mundo(datos = df,
                  estilo = list(anchoBorde = 1))
 ```
 </center>
-      
+
 
 ### Reflexión
 
@@ -1133,7 +1377,7 @@ Plot.Mundo(datos = df,
 ```{r}
 UnalData::Docentes %>%
   summarise(Total = n(), .by = c(YEAR, SEMESTRE, FORMACION)) %>%
-  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% 
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>%
 Plot.Series(
   tiempo    = vars(Periodo),
   valores   = Total,
@@ -1358,13 +1602,13 @@ Plot.Boxplot(
 #### Resultados por Competencias Prueba Saber Pro, periodo 2016-2022
 
 ```{r}
-Saber <- UnalData::SaberPro %>% 
+Saber <- UnalData::SaberPro %>%
   rename(GLOBAL = PUNTAJE_GLOBAL,
          `RAZONAMIENTO CUANTITATIVO` = PUNT_RAZO_CUANT,
          INGLÉS = PUNT_INGLES,
          `LECTURA CRÍTICA` = PUNT_LECT_CRIT,
          `COMPETENCIAS CIUDADANAS` = PUNT_COMP_CIUD,
-         `COMUNICACIÓN ESCRITA` = PUNT_COMU_ESCR) %>% 
+         `COMUNICACIÓN ESCRITA` = PUNT_COMU_ESCR) %>%
   mutate(`Saber Pro` = "Saber Pro")
 ```
 
@@ -1443,7 +1687,7 @@ Plot.Radar(
 ```
 </center>
 
-##### Estrato 
+##### Estrato
 
 <center>
 ```{r}
