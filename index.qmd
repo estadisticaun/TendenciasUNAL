@@ -153,7 +153,7 @@ library(viridis)
 
 <br>
 
-<p style="font-size:90%;">Esta presentación  contiene las principales <b>tendencias estadísticas</b> de la [Universidad Nacional de Colombia - UNAL](https://unal.edu.co/) durante los <b>últimos 15 años.</b><br><br> Específicamente, se presenta información a nivel de cifras relacionadas con las principales tendencias poblacionales de la UNAL, el comportamiento y evolución de los programas académicos, la evolución poblacional en materia de genero/sexo, una breve aproximación a la medición de la discapacidad, el comportamiento de la inclusión dentro de la Universidad, Bienestar Universitario en su dimensión económica, algunas características de la calidad en la institución, las cifras de deserción en pregado, el costo de la formación por estudiante, así como cifras relacionadas con los rankings.
+<p style="font-size:85%;">Esta presentación  contiene las principales <b>tendencias estadísticas</b> de la [Universidad Nacional de Colombia - UNAL](https://unal.edu.co/) durante los <b>últimos 15 años.</b><br><br> Específicamente, se presenta información a nivel de cifras relacionadas con las principales tendencias poblacionales de la UNAL, el comportamiento y evolución de los programas académicos, la evolución poblacional en materia de genero/sexo, una breve aproximación a la medición de la discapacidad, el comportamiento de la inclusión dentro de la Universidad, Bienestar Universitario en su dimensión económica, algunas características de la calidad en la institución, las cifras de deserción en pregado, el costo de la formación por estudiante, así como cifras relacionadas con los rankings.
 
 ---
 
@@ -201,13 +201,13 @@ library(viridis)
 
 <br>
 
-* [TENDENCIAS GENERALES]()
-* [PROGRAMAS ACADÉMICOS]()
-* [GÉNERO, DISCAPACIDAD, INCLUSIÓN, TERRITORIO Y BIENESTAR]()
-* [CALIDAD]()
-* [DESERCIÓN EN PREGRADO]()
-* [COSTOS POR ESTUDIANTE]()
-* [RANKINGS]()
+* [TENDENCIAS GENERALES](https://estadisticaun.github.io/TendenciasUNAL/#/tendencias-generales)
+* [PROGRAMAS ACADÉMICOS](https://estadisticaun.github.io/TendenciasUNAL/#/programas-acad%C3%A9micos)
+* [GÉNERO, DISCAPACIDAD, INCLUSIÓN, TERRITORIO Y BIENESTAR](https://estadisticaun.github.io/TendenciasUNAL/#/g%C3%A9nero-discapacidad-inclusi%C3%B3n-territorio-y-bienestar)
+* [CALIDAD](https://estadisticaun.github.io/TendenciasUNAL/#/calidad)
+* [DESERCIÓN EN PREGRADO](https://estadisticaun.github.io/TendenciasUNAL/#/deserci%C3%B3n-en-pregrado)
+* [COSTOS POR ESTUDIANTE](https://estadisticaun.github.io/TendenciasUNAL/#/costos-por-estudiante)
+* [RANKINGS](https://estadisticaun.github.io/TendenciasUNAL/#/rankings)
 
 
 ---
