@@ -31,6 +31,7 @@ library(readxl)
 ```{r}
 # Importar y Transformar Bases de Datos Generales
 
+# PROGRAMAS
 Programas <- read_excel("Fuentes/Programas.xlsx", 
                         sheet = "Hoja1",
                         guess_max = 1000)
@@ -49,7 +50,61 @@ Evol_Programas <- Programas %>% filter(Categoría == "Total Programas", YEAR != 
 
 Acreditacion <- Programas %>% filter(between(YEAR, 2006, 2023), Categoría != "Total Programas") %>% mutate(Categoría = ifelse(Categoría == "Acreditación", "Programas Acreditados", Categoría))
 
+# RANKINGS 
+
+# Importar datos ----
+
+
+Rankings <- read_excel("Fuentes/Rankings.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000)
+
+# Costos
+Costos <- read_excel("Fuentes/Costos.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000) %>% 
+          mutate(COSTO = round(COSTO, 2))
+
+# Bienestar
+
+Economica <- read_excel("Fuentes/Bienestar.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000) %>% arrange(desc(Periodo))
+
+Beneficios_Ext <- read_excel("Fuentes/ApoyosExt.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000) 
+
+# Cobertura Pregrado UNAL
+
+Asp_Pre <- UnalData::Aspirantes %>% 
+         filter(YEAR %in% c(2010:2023),
+         (TIPO_NIVEL == "Pregrado"  & is.na(MOD_INS) != TRUE & is.na(TIPO_INS) != TRUE)) %>% 
+  mutate(Periodo = paste(YEAR, SEMESTRE, sep = "-")) %>% 
+  summarise(Total = n(), .by = c(Periodo)) %>% 
+  mutate(Poblacion = "Aspirantes")
+
+  
+Adm_Pre <- UnalData::Aspirantes %>% 
+    filter(YEAR %in% c(2010:2023),
+         ADMITIDO == "Sí",
+         (TIPO_NIVEL == "Pregrado"  & is.na(MOD_INS) != TRUE & is.na(TIPO_INS) != TRUE)) %>% 
+  mutate(Periodo = paste(YEAR, SEMESTRE, sep = "-")) %>% 
+  summarise(Total = n(), .by = c(Periodo)) %>% 
+  mutate(Poblacion = "Admitidos")
+
+Mpvez_Pre <- UnalData::Matriculados %>% 
+  filter(between(YEAR, 2010, 2023),
+         TIPO_NIVEL == "Pregrado", 
+         MAT_PVEZ == "Sí") %>% 
+  mutate(Periodo = paste(YEAR, SEMESTRE, sep = "-")) %>% 
+  summarise(Total = n(), .by = c(Periodo)) %>% 
+  mutate(Poblacion = "Matriculados Primera Vez")
+
+Pob_UNAL <- bind_rows(Asp_Pre, Adm_Pre, Mpvez_Pre) 
+
 ```
+
 
 ## QR de la presentación
 
@@ -75,7 +130,7 @@ library(viridis)
 
 <br>
 
-<p style="font-size:100%;">Esta presentación  contiene las principales tendencias estadísticas de la [Universidad Nacional de Colombia](https://unal.edu.co/) durante los últimos 15 años. Así mismo, al final de cada uno de los diferentes componentes expuestos, se presentan algunas inquietudes generales o preguntas estratégicas que surgen de cada uno de los contenidos expuestos y que invitan a la reflexión sobre el presente y futuro de la institución.</p>
+<p style="font-size:100%;">Esta presentación  contiene las principales <b>tendencias estadísticas</b> de la [Universidad Nacional de Colombia](https://unal.edu.co/) durante los <b>últimos 15 años</b>. Así mismo, <b>al final</b> de cada uno de los diferentes componentes expuestos, se presentan algunas <b>inquietudes generales</b> o <b>preguntas estratégicas</b> que surgen de cada uno de los contenidos expuestos y que invitan a la <b>reflexión</b> sobre el <b>presente</b> y futuro de la institución.</p>
 
 ---
 
@@ -119,191 +174,20 @@ library(viridis)
 
 ---
 
-### Indice
+### Índice
 
-* [PROGRAMAS ACADÉMICOS]()
+<br>
+
 * [TENDENCIAS GENERALES]()
-* [GÉNERO, INCLUSIÓN, TERRITORIO Y BIENESTAR]()
+* [PROGRAMAS ACADÉMICOS]()
+* [GÉNERO, DISCAPACIDAD, INCLUSIÓN, TERRITORIO Y BIENESTAR]()
 * [CALIDAD]()
-* [DESERCIÓN]()
-* [INVESTIGACIÓN]()
-* [INTERNACIONALIZACIÓN]()
+* [DESERCIÓN EN PREGRADO]()
+* [COSTOS POR ESTUDIANTE]()
 * [RANKINGS]()
 
 
 ---
-
-## PROGRAMAS ACADÉMICOS {.center}
-
----
-
-### Características Programas Académicos UNAL
-
-::: panel-tabset
-
-### Total 
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Evol_Programas,
-  tiempo    = vars(YEAR),
-  valores   = Total,
-  categoria = Categoría,
-  titulo = "Evolución Total de Programas Académicos",
-  labelY =  "Total Programas",
-    estilo       = list(hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
-)
-```
-</center>
-
-### Nivel 
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Evol_Programas %>% mutate(Postgrado = Total - Pregrado) %>% select(YEAR, Pregrado, Postgrado) %>% pivot_longer(Pregrado:Postgrado, names_to = "Nivel", values_to = "Total"),
-  tiempo    = vars(YEAR),
-  valores   = Total,
-  categoria = Nivel,
-  titulo = "Evolución Total de Programas Académicos por Nivel de Formación",
-  labelY =  "Total Programas",
-  colores = c("#1f78b4","#e31a1c"),
-    estilo       = list(LegendTitle = "Nivel de Formación:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
-)
-```
-</center>
-
-### Postgrado
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Evol_Programas %>% select(YEAR:Doctorado) %>% pivot_longer(Especialización:Doctorado, names_to = "Nivel", values_to = "Total"),
-  tiempo    = vars(YEAR),
-  valores   = Total,
-  categoria = Nivel,
-  ylim         = c(0, 180),
-  titulo = "Evolución Total de Programas Académicos por Modalidades de Postgrado",
-  labelY =  "Total Programas",
-  colores = c("#ff7f00", "#377eb8", "#006d2c", "#e41a1c"),
-    estilo       = list(LegendTitle = "Modalidad Postgrado:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
-)
-```
-</center>
-
-### Acreditados
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = Total,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Pregrado
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = Pregrado,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de PREGRADO vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Postgrado
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = Postgrado,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de POSTGRADO vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Maestría
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = Maestría,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de MAESTRÍA vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Especialidades médicas
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = `Especialidades Médicas`,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de ESPECIALIDADES MÉDICAS vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Doctorado
-
-<center>
-```{r}
-Plot.Series(
-  datos     = Acreditacion,
-  tiempo    = vars(YEAR),
-  valores   = Doctorado,
-  categoria = Categoría,
-  freqRelativa = TRUE,
-    colores = c("#006d2c", "#e41a1c"),
-  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de DOCTORADO vs no Acreditados",
-  labelY =  "Porcentaje",
-    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
-)
-```
-</center>
-
-### Reflexión
-
-:::
-
 
 
 ## TENDENCIAS GENERALES {.center}
@@ -449,7 +333,63 @@ Plot.Series(
 ```
 </center>
 
-### Reflexión
+### Cobertura Pregrado
+
+::: columns
+::: {.column width="70%"}
+
+```{r, fig.align='center', height='750', width="1600"}
+ggplot(Pob_UNAL, aes(x = Periodo, y = Total, color = Poblacion, group = Poblacion))+
+       geom_line()+ geom_point()+
+  xlab("\n Periodo")+
+  ylab("Total\n")+
+  ylim(0, 80000)+
+  annotate(geom="text", x="2010-1", y=69000,
+           label= "     66.483", color="#2ca25f")+
+  annotate(geom="text", x="2022-2", y=16000,
+           label= "18.825", color="#2ca25f")+
+  annotate(geom="text", x="2023-2", y=28000,
+           label= "31.095    ", color="#2ca25f")+
+  annotate(geom="text", x="2019-1", y=79000,
+           label= "75.681", color="#2ca25f")+
+  annotate(geom="text", x="2010-1", y=9000,
+           label= "    6.467", color="red")+
+  annotate(geom="text", x="2019-1", y=9000,
+           label= "6.951", color="red")+
+  annotate(geom="text", x="2022-2", y=9000,
+           label= "6.206  ", color="red")+
+  annotate(geom="text", x="2023-2", y=3000,
+           label= "5.620   ", color="red")+
+  annotate(geom="text", x="2010-1", y=2000,
+           label= "    5.096", color="blue")+
+  annotate(geom="text", x="2019-1", y=2000,
+           label= "5.370", color="blue")+
+  annotate(geom="text", x="2022-2", y=2000,
+           label= "4.522  ", color="blue")+
+  theme(axis.text.y = element_text(size = 10, face = "bold"),
+        axis.text.x = element_text(size = 9, colour = "blue", angle = 90),
+        axis.title = element_text(face="bold", color="black", size=13),
+        legend.position="bottom",
+        legend.title = element_text("Población", size = 12, face="bold"),
+        legend.text = element_text(size = 12),
+        strip.text = element_text(size = 12))
+
+```
+:::
+::: {.column width="30%"}
+
+###### Estadísticas Pregrado 2010-2023
+
+<p style="font-size:80%;"><span>&#42;</span> Aspirantes <br><FONT COLOR="red">1.430.146 </FONT></p>
+
+<p style="font-size:80%;"><span>&#42;</span> Admitidos <br><FONT COLOR="red">173.440 </FONT></p>
+
+<p style="font-size:80%;"><span>&#42;</span> Primera matrícula <br><FONT COLOR="red">136.603 </FONT></p>
+
+<p style="font-size:80%;"><span>&#42;</span> Tasa de absorción <br><FONT COLOR="red">9 % y 12 % </FONT></p>
+
+:::
+:::
 
 :::
 
@@ -568,7 +508,6 @@ Plot.Series(
 ```
 </center>
 
-### Reflexión
 
 :::
 
@@ -685,7 +624,6 @@ Plot.Series(
 ```
 </center>
 
-### Reflexión
 
 :::
 
@@ -777,8 +715,6 @@ Plot.Series(
 ```
 </center>
 
-
-### Reflexión
 
 :::
 
@@ -874,14 +810,183 @@ Plot.Series(
 ```
 </center>
 
-
-### Reflexión
-
 :::
+
+## PROGRAMAS ACADÉMICOS {.center}
 
 ---
 
-## GÉNERO, INCLUSIÓN, TERRITORIO Y BIENESTAR {.center}
+### Características Programas Académicos UNAL
+
+::: panel-tabset
+
+### Total
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas,
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Categoría,
+  titulo = "Evolución Total de Programas Académicos",
+  labelY =  "Total Programas",
+    estilo       = list(hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Nivel
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas %>% mutate(Postgrado = Total - Pregrado) %>% select(YEAR, Pregrado, Postgrado) %>% pivot_longer(Pregrado:Postgrado, names_to = "Nivel", values_to = "Total"),
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Nivel,
+  titulo = "Evolución Total de Programas Académicos por Nivel de Formación",
+  labelY =  "Total Programas",
+  colores = c("#1f78b4","#e31a1c"),
+    estilo       = list(LegendTitle = "Nivel de Formación:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Evol_Programas %>% select(YEAR:Doctorado) %>% pivot_longer(Especialización:Doctorado, names_to = "Nivel", values_to = "Total"),
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Nivel,
+  ylim         = c(0, 180),
+  titulo = "Evolución Total de Programas Académicos por Modalidades de Postgrado",
+  labelY =  "Total Programas",
+  colores = c("#ff7f00", "#377eb8", "#006d2c", "#e41a1c"),
+    estilo       = list(LegendTitle = "Modalidad Postgrado:", hc.Tema = 5, hc.Credits = "Periodo 1994-2023")
+)
+```
+</center>
+
+### Acreditación
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Pregrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Pregrado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de PREGRADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Postgrado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de POSTGRADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Maestría
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Maestría,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de MAESTRÍA vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Especialidades médicas
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = `Especialidades Médicas`,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de ESPECIALIDADES MÉDICAS vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+### Doctorado
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Doctorado,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados de DOCTORADO vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
+
+:::
+
+
+
+
+---
+
+## GÉNERO, DISCAPACIDAD, INCLUSIÓN, TERRITORIO Y BIENESTAR {.center}
 
 
 ---
@@ -1085,9 +1190,115 @@ Plot.Series(
 ```
 </center>
 
-### Reflexión
+:::
+
+---
+
+### Población en Situación de Discapacidad
+
+::: panel-tabset
+
+### Observación
+
+### Aspirantes
+
+<center>
+```{r}
+UnalData::Aspirantes %>%
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, DISCAPACIDAD)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% filter(YEAR >= 2011) %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  categoria = DISCAPACIDAD,
+  colores = c("#00FF40", "#FF0040"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de aspirantes a la UNAL en situación de discapacidad",
+  labelX    = "Periodo",
+  labelY    = "Total aspirantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### 2024-1
+
+<center>
+```{r}
+Agregar(
+  datos      = UnalData::Aspirantes ,
+  formula    = DISCAPACIDAD + TIPO_DISC	 ~ YEAR + SEMESTRE,
+  frecuencia = list("Year" = 2022:2024, "Period" = 1:2),
+  intervalo  = list(c(2024, 1), c(2024, 1))) %>%
+  filter(!Clase %in% c("Sin Información", "No aplica", "No Aplica")) %>% 
+  Plot.Drilldown(
+  #datos         = UnalData::Aspirantes,
+  varPrincipal  = "DISCAPACIDAD",
+  varSecundaria = "TIPO_DISC",
+  ano           = 2024,
+  periodo       = 1,
+  torta         = TRUE, 
+  vertical      = TRUE,
+  colores       = c("#00FF40", "#FF0040"),
+  colores2      = c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F"),
+  titulo        = "Distribución de aspirantes a la UNAL en situación de discapacidad",
+  label         = "Aspirantes",
+  addPeriodo    = TRUE,
+  estilo        = list(hc.Tema = 5)
+)
+```
+</center>
+
+### Admitidos
+
+<center>
+```{r}
+UnalData::Aspirantes %>% filter(ADMITIDO == "Sí") %>% 
+  summarise(Total = n(), .by = c(YEAR, SEMESTRE, DISCAPACIDAD)) %>%
+  mutate(Periodo = factor(paste(YEAR, SEMESTRE, sep = "-"))) %>% filter(YEAR >= 2011) %>% 
+  Plot.Series(
+  tiempo    = vars(Periodo),
+  valores   = Total,
+  categoria = DISCAPACIDAD,
+  colores = c("#00FF40", "#FF0040"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total de admitidos a la UNAL en situación de discapacidad",
+  labelX    = "Periodo",
+  labelY    = "Total admitidos",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### 2024-1
+
+<center>
+```{r}
+Agregar(
+  datos      = UnalData::Aspirantes %>% filter(ADMITIDO == "Sí"),
+  formula    = DISCAPACIDAD + TIPO_DISC	 ~ YEAR + SEMESTRE,
+  frecuencia = list("Year" = 2022:2024, "Period" = 1:2),
+  intervalo  = list(c(2024, 1), c(2024, 1))) %>%
+  filter(!Clase %in% c("Sin Información", "No aplica", "No Aplica")) %>% 
+  Plot.Drilldown(
+  varPrincipal  = "DISCAPACIDAD",
+  varSecundaria = "TIPO_DISC",
+  ano           = 2024,
+  periodo       = 1,
+  torta         = TRUE, 
+  vertical      = TRUE,
+  colores       = c("#00FF40", "#FF0040"),
+  colores2      = c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F"),
+  titulo        = "Distribución de admitidos a la UNAL en situación de discapacidad",
+  label         = "Admitidos",
+  addPeriodo    = TRUE,
+  estilo        = list(hc.Tema = 5)
+)
+```
+</center>
 
 :::
+
 
 ---
 
@@ -1096,6 +1307,24 @@ Plot.Series(
 ::: panel-tabset
 
 ### Descripción
+
+::: columns
+::: {.column width="40%"}
+
+<p style="font-size:70%;">La Universidad Nacional de Colombia UNAL a lo largo de la historia ha dispuesto un número importante de acciones orientadas a la formación de calidad en educación superior a través de la inclusión principalmente de poblaciones minoritarias, en extrema pobreza o ubicadas en territorios apartados del país, entre otras. <br><br>En la actualidad, la inclusión en la UNAL se materializa principalmente a través de los programas <b>PAES, PEAMA y PAET.</b></p>
+
+:::
+
+::: {.column width="2%"}
+:::
+
+::: {.column width="58%"}
+
+<p style="font-size:70%;"><b>PAES</b><br>Comunidades indígenas, mejores bachilleres, mejores bachilleres de municipios pobres, población afrocolombiana y víctimas del conflicto interno armado en Colombia.<br><br><b>PEAMA</b><br><u>PEAMA-Amazonía</u>, <u>PEAMA-Caribe</u>, <u>PEAMA-Orinoquía</u>, <u>PEAMA-Tumaco</u>, PEAMA-Sumapaz, PEAMA-Caldas y PEAMA-Sinifaná.<br><br><b>PAET</b><br>PAET-Caribe, PAET-Amazonía, PAET-Tumaco, PAET-Orinoquía, PAET-Medellín, PAET-Manizales y PAET-Palmira.</p>
+
+
+:::
+:::
 
 ### Aspirantes
 
@@ -1142,7 +1371,7 @@ Plot.Series(
 </center>
 
 
-### Matricula
+### Matrícula
 
 <center>
 ```{r}
@@ -1243,7 +1472,6 @@ UnalData::Aspirantes %>%
 ```
 </center>
 
-### Reflexión
 
 :::
 
@@ -1354,19 +1582,147 @@ Plot.Mundo(datos = df,
 ```
 </center>
 
+:::
 
-### Reflexión
+---
+
+#### Bienestar Universitario - Beneficiarios apoyos socioeconómicos UNAL
+
+::: panel-tabset
+
+### Económicos
+
+<center>
+```{r}
+Economica %>% filter(Programa == "Apoyo Económico") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  categoria = Beneficiarios,
+  valores   = Total,
+  colores = c("#e41a1c"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total estudiantes beneficiarios de apoyos económicos",
+  labelX    = "Periodo",
+  labelY    = "Total estudiantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+
+### Alimentario
+
+<center>
+```{r}
+Economica %>% filter(Programa == "Apoyo Alimentario") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  categoria = Beneficiarios,
+  valores   = Total,
+  colores = c("blue"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total estudiantes beneficiarios de apoyos alimentarios",
+  labelX    = "Periodo",
+  labelY    = "Total estudiantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Transporte
+
+<center>
+```{r}
+Economica %>% filter(Programa == "Apoyo Para el Transporte") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  categoria = Beneficiarios,
+  valores   = Total,
+  colores = c("green"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total estudiantes beneficiarios de apoyos para el transporte",
+  labelX    = "Periodo",
+  labelY    = "Total estudiantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### Alojamiento
+
+<center>
+```{r}
+Economica %>% filter(Programa == "Apoyo Para el Alojamiento") %>% 
+Plot.Series(
+  tiempo    = vars(Periodo),
+  categoria = Beneficiarios,
+  valores   = Total,
+  colores = c("red"),
+  ylim = c(0, NaN),
+  titulo = "Evolución total estudiantes beneficiarios de apoyos para el alojamiento",
+  labelX    = "Periodo",
+  labelY    = "Total estudiantes",
+  estilo = list(hc.Tema = 5))
+```
+</center>
+
+### 2023-2
+
+<center>
+```{r}
+Economica %>% filter(Periodo == "2023-2") %>% 
+  Plot.Barras(
+  valores   = Total,
+  categoria = Programa     ,
+  colores   = c("#40D2FF", "#FF553D", "#FFDB5C", "#A5FF67"),
+  titulo = "Distribución de apoyos económicos en la UNAL por modalidades, periodo 2023-2",
+  labelY    = "Total beneficiarios",
+   estilo = list(hc.Tema = 5)
+)
+```
+</center>
+
+### Externos
+
+<center>
+```{r}
+Beneficios_Ext %>% select(Programas, `2023`) %>% filter(!Programas %in% c("Iparm", "Jardín", "Escuela Medellín")) %>% 
+  Plot.Barras(
+  valores   = `2023`,
+  categoria = Programas     ,
+  colores   = c("#40D2FF", "#FF553D", "#FFDB5C", "#A5FF67", "#984ea3"),
+  titulo = "Distribución de estudiantes beneficiarios de apoyos externos a la UNAL",
+  labelY    = "Total beneficiarios",
+  labelX = "Programa",
+   estilo = list(hc.Tema = 5)
+)
+```
+</center>
 
 :::
 
 ---
 
-### Bienestar Universitario
+## CALIDAD {.center}
 
 ---
 
-## CALIDAD {.center}
+### Programas Académicos Acreditados
 
+<br>
+
+<center>
+```{r}
+Plot.Series(
+  datos     = Acreditacion,
+  tiempo    = vars(YEAR),
+  valores   = Total,
+  categoria = Categoría,
+  freqRelativa = TRUE,
+    colores = c("#006d2c", "#e41a1c"),
+  titulo = "Evolución Porcentaje de Programas Académicos Acreditados vs no Acreditados",
+  labelY =  "Porcentaje",
+    estilo       = list(LegendTitle = "¿Acreditación?", hc.Tema = 5, hc.Credits = "Periodo 2006-2023")
+)
+```
+</center>
 
 ---
 
@@ -1393,9 +1749,9 @@ Plot.Series(
 
 ---
 
-### Razón Estudiante por Docente
+<!-- ### Razón Estudiante por Docente -->
 
----
+<!-- --- -->
 
 ### Resultados Examen de Admisión UNAL - Pregrado
 
@@ -1593,8 +1949,6 @@ Plot.Boxplot(
 ```
 </center>
 
-### Reflexión
-
 :::
 
 ---
@@ -1759,9 +2113,314 @@ Plot.Radar(
 ```
 </center>
 
-##### Reflexión
+:::
+
+
+---
+
+## COSTOS POR ESTUDIANTE {.center}
+
+--- 
+
+#### Costos <u>Anuales</u> Formación UNAL, Año 2022. 
+
+::: panel-tabset
+### Descripción
+
+<center>[![](Imagenes/Costos.png){height="450"}](https://estadisticaun.github.io/MCostos/)</center>
+
+### General
+
+<br>
+
+<p style="font-size:85%;">la <u><b>mediana de costos anuales</u></b> de formación por estudiante en los programas académicos de la UNAL fue, para el año 2022, de <b><u>35.78 millones </b></u>, influenciada en buena medida por los valores existentes en los programas de postgrado. <br><br> El programa con <b>más bajo costo por estudiante</b> de la UNAL en el año 2022 es el de <b>Administración de Empresas</b> de la <b>Sede Bogotá</b> con un costo de <b><u>6.51 millones anuales</b></u> y, el de <b>mayor costo</b>, el <b>Doctorado en Ciencia y tecnología de Alimentos</b> de la Facultad de Ciencias Agrarías de la <b>Sede Medellín</b> con un costo de <b><u>225.13 millones </b></u> anuales por estudiante.</p>
+
+### Nivel
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos,
+  variable = COSTO,
+  grupo1 = AÑO,
+  grupo2 = NIVEL,
+  vertical = FALSE,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+ colores = c("#e41a1c", "blue"),
+ # colores = c("#e41a1c","#377eb8", "#ff7f00","#4daf4a"),
+  titulo = "Distribución costos anuales programas académicos de la UNAL por nivel de formación",
+  labelY = "Costo 2022 (millones de pesos)",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Nivel de formación:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
+### Modalidades Pos
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos %>% filter(NIVEL == "Postgrado"),
+  variable = COSTO,
+  grupo1 = AÑO,
+  grupo2 = MODALIDAD,
+  vertical = FALSE,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+ #colores = c("#e41a1c", "#4daf4a"),
+  colores = c("blue","red", "green","blue", "red", "red"),
+  titulo = "Distribución costos anuales programas académicos de la UNAL por modalidades de postgrado",
+  labelY = "Costo 2022 (millones de pesos)",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Modalidad postgrado:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
+
+
+
+### Pregrado
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos %>% filter(NIVEL == "Pregrado"),
+  variable = COSTO,
+  grupo1 = SEDE,
+  vertical = FALSE,
+  #grupo2 = NIVEL,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+  colOutlier = "green",
+  colores = c("#e41a1c", "blue", "#e41a1c",
+              "#ff7f00", "blue", "blue",
+              "#e41a1c", "blue", "#e41a1c"),
+  titulo = "Distribución costos anuales programas académicos de PREGRADO por sedes",
+  labelY = "Costo 2022 (millones de pesos)",
+  labelX = " ",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Nivel de formación:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
+### Postgrado
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos %>% filter(NIVEL == "Postgrado"),
+  variable = COSTO,
+  grupo1 = SEDE,
+  vertical = FALSE,
+  #grupo2 = NIVEL,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+  colOutlier = "red",
+  colores = c("red", "blue", "red", "blue", "blue", "blue"),
+  titulo = "Distribución costos anuales programas académicos de POSTGRADO por sedes",
+  labelY = "Costo 2022 (millones de pesos)",
+  labelX = " ",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Nivel de formación:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
+### Facultades PRE
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos%>% filter(NIVEL == "Pregrado", !SEDE%in%c("Amazonía", "Caribe", "Orinoquía", "Tumaco", "La Paz")),
+  variable = COSTO,
+  grupo1 = FACULTAD_S,
+  vertical = FALSE,
+  #grupo2 = NIVEL,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+  colOutlier = "red",
+  colores = c(rep("blue", 21)),
+  titulo = "Distribución costos anuales en PREGRADO por estudiante por facultades sedes andinas sin La Paz",
+  labelY = "Costo 2022 (millones de pesos)",
+  labelX = " ",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Nivel de formación:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
+### Facultades POS
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Costos%>% filter(NIVEL == "Postgrado", !SEDE%in%c("Amazonía", "Caribe", "Orinoquía", "Tumaco", "La Paz")),
+  variable = COSTO,
+  grupo1 = FACULTAD_S,
+  vertical = FALSE,
+  #grupo2 = NIVEL,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+  colOutlier = "red",
+  colores = c(rep("blue", 21)),
+  titulo = "Distribución costos anuales en POSTGRADO por estudiante por facultades sedes andinas sin La Paz",
+  labelY = "Costo 2022 (millones de pesos)",
+  labelX = " ",
+  textBox = "Costo(en millones)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Nivel de formación:", hc.Tema = 5, hc.Credits = "Año 2022"))
+```
+</center>
+
 
 :::
+
+
+
+---
+
+## RANKINGS {.center}
+
+---
+
+### La Universidad Nacional de Colombia en los Rankings
+
+::: panel-tabset
+
+### Observación
+
+### QS 
+
+<center>
+```{r}
+
+QSMundoDF <- Rankings %>% filter(RANKING == 'QSMundo') %>% select(-c("RANKING", "SEMESTRE"))
+
+Uyear <- QSMundoDF |> summarise(Max = max(YEAR)) |> as.numeric()
+Msj <- paste0("Periodo: 2011-", Uyear)
+
+Plot.Series(
+  datos     = QSMundoDF,
+  categoria = "TOTAL", 
+  invertir = TRUE,
+  colores = c("#00BB2D"),
+  ylim = c(0, 500),
+  titulo = "Evolución posiciones de la UNAL en QS World University Rankings",
+  labelX = "Año",
+  labelY = "Puesto Mundo",
+  libreria = "highcharter",
+  estilo    = list(hc.Tema = 5, hc.Slider = FALSE,
+                   hc.Credits = Msj))
+
+```
+</center>
+
+### THE 
+
+<center>
+```{r}
+THEMundoDF <- Rankings %>% filter(RANKING == 'THEMundo') %>% select(-c("RANKING", "SEMESTRE"))
+
+Uyear <- THEMundoDF |> summarise(Max = max(YEAR)) |> as.numeric()
+Msj <- paste0("Periodo: 2017-", Uyear)
+
+Plot.Series(datos = THEMundoDF, 
+               categoria = "TOTAL", 
+               invertir = TRUE,
+               col = c("#00BB2D"),
+               ylim = c(0, 1400),
+               libreria = "highcharter",
+               titulo = "Evolución posiciones de la UNAL en Times Higher Education (THE)
+                         World University Rankings",
+               labelX = "Año",
+               labelY = "Puesto Mundo",
+               estilo    = list(hc.Tema = 5, hc.Slider = FALSE,
+                                hc.Credits = Msj))
+
+```
+</center>
+
+### ARWU  
+
+<center>
+```{r}
+ARWUMundoDF <- Rankings %>% filter(RANKING == 'ARWUMundo') %>% select(-c("RANKING", "SEMESTRE"))
+
+Uyear <- ARWUMundoDF |> summarise(Max = max(YEAR)) |> as.numeric()
+Msj <- paste0("Periodo: 2014-", Uyear)
+
+Plot.Series(datos = ARWUMundoDF, 
+                                categoria = "TOTAL", 
+                                invertir = TRUE,
+                                col = c("#00BB2D"),
+                                ylim = c(0, 1000),
+                                libreria = "highcharter",
+                                titulo = "Evolución posiciones de la UNAL en Academic Ranking of World Universities
+                                          ARWU - Shanghai",
+                                labelX = "Año",
+                                labelY = "Puesto Mundo",
+                                estilo    = list(hc.Tema = 5, hc.Slider = FALSE,
+                                                 hc.Credits = Msj))
+```
+</center>
+
+### MERCO
+
+<center>
+```{r}
+MERCOEmpresasDF <- Rankings %>% filter(RANKING == 'MERCOEmpresas') %>% select(-c("RANKING", "SEMESTRE"))
+
+Uyear <- MERCOEmpresasDF |> summarise(Max = max(YEAR)) |> as.numeric()
+Msj <- paste0("Periodo: 2011-", Uyear)
+
+Plot.Series(datos = MERCOEmpresasDF, 
+                             categoria = "TOTAL",
+                             invertir = TRUE,
+                             col = c("#00BB2D"),
+                             ylim = c(0, 70),
+                             libreria = "highcharter",
+                             titulo = "Evolución posiciones de la UNAL en MERCO EMPRESAS",
+                             labelX = "Año",
+                             labelY = "Puesto en Colombia",
+                             estilo    = list(hc.Tema = 5, hc.Slider = FALSE,
+                                              hc.Credits = Msj))
+```
+</center>
+
+### USapiens
+
+<center>
+```{r}
+USapiensDF <- Rankings %>% filter(RANKING == 'USapiens') %>% select(-c("RANKING"))
+
+Uyear <- USapiensDF |> summarise(Max = max(YEAR)) |> as.numeric()
+Msj <- paste0("Periodo: 2011-", Uyear)
+
+Plot.Series(datos = USapiensDF, 
+                              categoria = "USAPIENS", 
+                              col = c("#8cc63f", "#f15a24", "#93278f"),
+                              invertir = TRUE,
+                              libreria = "highcharter",
+                              titulo = "Evolución posiciones de las sedes de la UNAL en el Ranking U-Sapiens",
+                              labelX = "Semestre",
+                              labelY = "Puesto en Colombia",
+                              estilo    = list(LegendTitle = "Posiciones sedes UNAL:", hc.Tema = 5, hc.Slider = FALSE,
+                                               hc.Credits = Msj))
+```
+</center>
+
+:::
+
 
 ---
 
