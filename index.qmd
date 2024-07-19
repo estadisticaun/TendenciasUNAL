@@ -103,6 +103,29 @@ Mpvez_Pre <- UnalData::Matriculados %>%
 
 Pob_UNAL <- bind_rows(Asp_Pre, Adm_Pre, Mpvez_Pre) 
 
+# Deserción
+
+# Por Cohortes
+
+Deserción_Coh <- read_excel("Fuentes/Deserción.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000) %>% 
+  mutate(Deserción = round(Deserción*100, 2),
+         Desvinculación = round(Desvinculación*100, 2),
+       .keep= "unused")
+
+# Por Programas
+
+Deserción_Prog <- read_excel("Fuentes/Deserción Programas.xlsx", 
+                        sheet = "Hoja1",
+                        guess_max = 1000) %>% 
+                  summarise(Académica = sum(Académica), 
+                            `No Académica` = sum(`No Académica`),
+                            Deserción = sum(Deserción),
+                            Total = sum(Total), 
+                            .by = c(Sede, Facultad_S, Programa, Global)) %>% mutate(Académica = round((Académica/Total)*100, 2),                                                   `No Académica` = round((`No Académica`/Total)*100,2),                                               Deserción = round((Deserción/Total)*100,2),
+.keep= "unused")
+  
 ```
 
 
@@ -130,13 +153,13 @@ library(viridis)
 
 <br>
 
-<p style="font-size:100%;">Esta presentación  contiene las principales <b>tendencias estadísticas</b> de la [Universidad Nacional de Colombia](https://unal.edu.co/) durante los <b>últimos 15 años</b>. Así mismo, <b>al final</b> de cada uno de los diferentes componentes expuestos, se presentan algunas <b>inquietudes generales</b> o <b>preguntas estratégicas</b> que surgen de cada uno de los contenidos expuestos y que invitan a la <b>reflexión</b> sobre el <b>presente</b> y futuro de la institución.</p>
+<p style="font-size:90%;">Esta presentación  contiene las principales <b>tendencias estadísticas</b> de la [Universidad Nacional de Colombia - UNAL](https://unal.edu.co/) durante los <b>últimos 15 años.</b><br><br> Específicamente, se presenta información a nivel de cifras relacionadas con las principales tendencias poblacionales de la UNAL, el comportamiento y evolución de los programas académicos, la evolución poblacional en materia de genero/sexo, una breve aproximación a la medición de la discapacidad, el comportamiento de la inclusión dentro de la Universidad, Bienestar Universitario en su dimensión económica, algunas características de la calidad en la institución, las cifras de deserción en pregado, el costo de la formación por estudiante, así como cifras relacionadas con los rankings.
 
 ---
 
 ### Estadísticas e Indicadores Oficiales de la UNAL
 
-<p style="font-size:70%;">El contenido de esta presentación, así como otra adicional y con mayores niveles de detalle, se encuentra disponible en la [página de estadísticas oficiales](https://estadisticas.unal.edu.co/home/) de la Universidad Nacional de Colombia- UNAL. La información estadística oficial de la UNAL se dispone a través de dos estrategias: aplicaciones/dashboards y boletines estadísticos. A continuación, se presentan los enlaces a las aplicaciones y boletines estadísticos disponibles.</p>
+<p style="font-size:70%;">La información contenida en esta presentación, así como otra adicional y con mayores niveles de detalle, se encuentra disponible en la [página de estadísticas oficiales](https://estadisticas.unal.edu.co/home/) de la Universidad Nacional de Colombia- UNAL. La información estadística oficial de la UNAL se dispone a través de dos estrategias: aplicaciones/dashboards y boletines estadísticos. A continuación, se presentan los enlaces a las aplicaciones y boletines estadísticos disponibles.</p>
 
 ::: columns
 
@@ -1168,7 +1191,7 @@ Plot.Series(
 ```
 </center>
 
-### NNacional
+### Nivel Nacional
 
 <center>
 ```{r}
@@ -1199,6 +1222,10 @@ Plot.Series(
 ::: panel-tabset
 
 ### Observación
+
+<br>
+
+<p style="font-size:83%;"> Aunque existen importantes avances a nivel <b>conceptual y de políticas</b> en materia de discapacidad en la UNAL, estas no necesariamente se han traducido en acciones y registros reales en los diversos sistemas de información, así como en una <b>interoperabilidad efectiva</b> entre los diversos <b>sistemas</b> cuando la información de este tipo ha estado o está disponible. Por lo anterior, <b>esta presentación sólo incluye cifras</b> a nivel de <b>discapacidad</b> para los estudiantes <b>aspirantes y los admitidos</b> a la Universidad.<br><br>A la fecha, <u><b>no existe información precisa, estandarizada, gobernada y centralizada </b></u> sobre <b>discapacidad</b> en las poblaciones de <b>matriculados, graduados, egresados, docentes, funcionarios</b>, entre otros.</p>
 
 ### Aspirantes
 
@@ -1467,11 +1494,11 @@ UnalData::Aspirantes %>%
   valores   = Total,
   categoria = PAET,
     titulo = "Distribución admitidos en la UNAL Programa PAET, periodo 2024-1",
-  labelY    = "Total admitidos"
+  labelY    = "Total admitidos",
+  estilo = list(hc.Tema = 5)
 )
 ```
 </center>
-
 
 :::
 
@@ -2115,6 +2142,119 @@ Plot.Radar(
 
 :::
 
+---
+
+## DESERCIÓN EN PREGRADO {.center}
+
+---
+
+### Análisis Deserción en Pregrado por Cohortes
+
+::: panel-tabset
+
+### Descripción
+
+<br>
+
+<p style="font-size:80%;"> La medición de la deserción estudiantil en Colombia históricamente se ha adelantado a través de dos estrategias: <b>intersemestral y por cohortes</b>.<br> Esta presentación utiliza el enfóque de <b>cohortes</b> y para ello evalúa cuántos de los estudiantes que fueron admitidos a la Universidad Nacional de Colombia en los dos periodos del <b>año 2014 (cohortes 2014-1 y 2014-2)</b> habían <b>desertado</b>, según los criterios definidos a nivel institucional, al ser <b>evaluados en el primer semestre del año 2023</b>.</p> 
+
+### General
+
+<center>
+
+```{r}
+  Plot.Series(
+  datos = Deserción_Coh %>% filter(Sede == "Nacional"),
+  tiempo    = vars(Cohorte),
+  valores   = Deserción,
+  categoria = Sede,
+  colores = c("green"),
+  ylim = c(0, 100),
+  titulo = "Tasa de deserción en la UNAL por cohortes, periodo 2010-2015",
+  labelX    = "Cohorte",
+  labelY    = "Porcentaje deserción (%)",
+  estilo = list(hc.Tema = 5))
+```
+
+</center>
+
+### Sedes
+
+<center>
+```{r}
+  Plot.Series(
+  datos = Deserción_Coh %>% filter(!(Sede == "Nacional")),
+  tiempo    = vars(Cohorte),
+  valores   = Deserción,
+  categoria = Sede,
+  colores = c("green", "blue", "#e41a1c", "#ff7f00"),
+  ylim = c(0, NaN),
+  titulo = "Tasa de deserción en la UNAL por Sedes Andinas y cohortes, periodo 2010-2015",
+  labelX    = "Cohorte",
+  labelY    = "Porcentaje deserción (%)",
+  estilo = list(LegendTitle = "Sede:", hc.Tema = 5))
+```
+</center>
+
+### Programas
+
+<p style="font-size:85%;">Tomando como referente el total de <b>estudiantes matriculados por primera vez</b> en el año 2014 <b>(cohortes 2014)</b>, la <u><b>mediana de la tasa de deserción</u></b> de los <b>programas académicos de pregrado</b> de la Universidad Nacional de Colombia se ubica en <b>39.31 %</b>. <br><br> El programa de pregrado con <b>más baja deserción</b> es el de <b>Medicina</b> de la Facultad de Medicina de la <b>Sede Bogotá</b> con una tasa, para las cohortes del año 2014, <b>de 11.86 %</b>. En contraste, el programa con <b>más alta deserción</b> es el de <b>Ingeniería Agrícola</b> de la Facultad de Ciencias Agrarias de la <b>Sede Medellín</b>, con una tasa deserción por cohortes (año 2014) de <b>76.70 %</b>.</p>
+
+
+### Programas Sedes
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Deserción_Prog,
+  variable = Deserción,
+  grupo1 = Sede,
+  vertical = FALSE,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 1,
+  colOutlier = "gray",
+  colores = c("green", "blue", "#e41a1c", "#ff7f00"),
+  titulo = "Distribución tasas de deserción de programas académicos de pregrado por sedes, cohortes 2014",
+  labelY = "Tasa de deserción (%)",
+  labelX = " ",
+  textBox = "Deserción(%)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Sede:", hc.Tema = 5, hc.Credits = "Cohortes 2014"))
+```
+</center>
+
+
+### Programas Facultades
+
+<center>
+```{r}
+Plot.Boxplot(
+  datos = Deserción_Prog,
+  variable = Deserción,
+  grupo1 = Facultad_S,
+  vertical = FALSE,
+  ylim = c(0, NaN),
+  outliers = TRUE,
+  sizeOutlier = 0.5,
+  colOutlier = "#c51b8a",
+  colores = c("green", "blue", "red", "blue", "blue",
+              "green", "blue", "blue", "blue", "blue",
+              "green", "blue", "red", "blue", "blue",
+              "red", "red", "blue", "blue", "blue",
+              "blue"),
+  titulo = "Distribución tasas de deserción de programas académicos de pregrado por facultades, cohortes 2014",
+  labelY = "Tasa de deserción (%)",
+  labelX = " ",
+  textBox = "Deserción(%)",
+  libreria = "highcharter",
+  estilo = list(LegendTitle = "Sede:", hc.Tema = 5, hc.Credits = "Cohortes 2014"))
+```
+</center>
+
+
+
+:::
 
 ---
 
@@ -2298,6 +2438,15 @@ Plot.Boxplot(
 ::: panel-tabset
 
 ### Observación
+
+#### Algunas características de los rankings
+
+<br>
+
+<p style="font-size:85%;"><span>&#42;</span> Alto crecimiento.</p>
+<p style="font-size:85%;"><span>&#42;</span> Enfoque en el mercado de los datos y del cococimiento (multinacionales).</p>
+<p style="font-size:85%;"><span>&#42;</span> Alta influencia a nivel político y en los medios de comunicación.</p>
+<p style="font-size:85%;"><span>&#42;</span> Medición creciente de instituciones, así estas no provean información.</p>
 
 ### QS 
 
