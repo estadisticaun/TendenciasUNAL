@@ -38,12 +38,10 @@ Programas <- read_excel("Fuentes/Programas.xlsx",
 
 # Transformar bases programas
 
-Programas <- Programas %>% pivot_longer(`1994`:`2024`, names_to = "YEAR", values_to = "Total") %>% pivot_wider(names_from = Nivel, values_from = Total) %>% mutate(Total = Pregrado + Especialización + `Especialidades Médicas`+ Maestría, Doctorado,
- Postgrado =  Especialización + `Especialidades Médicas`+ Maestría, Doctorado,
+Programas <- Programas %>% pivot_longer(`1994`:`2024`, names_to = "YEAR", values_to = "Total") %>% pivot_wider(names_from = Nivel, values_from = Total) %>% mutate(Total = Pregrado + Especialización + `Especialidades Médicas`+ Maestría+ Doctorado,
+ Postgrado =  Especialización + `Especialidades Médicas`+ Maestría+ Doctorado,
  YEAR = as.numeric(YEAR)) %>% 
   mutate(Categoría = ifelse(Categoría == "Programas", "Total Programas", Categoría))
-
-
 
 Evol_Programas <- Programas %>% filter(Categoría == "Total Programas", YEAR != 2024)
 
